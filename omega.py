@@ -1193,7 +1193,11 @@ class omega( chem_evol ):
         m_stel_sfr_in = 0.0
 
         # Open the file containing the SFR vs time
-        with open(os.path.join(nupy_path, path_sfh_in), 'r') as sfr_file:
+        if os.path.exists(path_sfh_in):
+            file_in = path_sfh_in
+        else:
+            file_in = os.path.join(nupy_path, path_sfh_in)
+        with open(file_in, 'r') as sfr_file:
 
             # Read the first line  (col 0 : t, col 1 : SFR)
             line_1_str = sfr_file.readline()

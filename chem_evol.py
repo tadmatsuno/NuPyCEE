@@ -203,6 +203,12 @@ class chem_evol(object):
                 'maoz' - specific power law from Maoz & Mannucci (2012)
 
         Default value : 'power_law'
+    
+    life_time_min_ia : float or None
+        Minimum life time of SNe Ia progenitors [yr].
+        If None, the minimum life time will be take from the stellar lifetime table.
+        
+        Default value : None
 
     sn1a_energy : float
         Energy ejected by single SNIa event. Units in erg.
@@ -438,7 +444,8 @@ class chem_evol(object):
     ##               Constructor                ##
     ##############################################
     def __init__(self, imf_type='kroupa', alphaimf=2.35, imf_bdys=[0.1,100],\
-             sn1a_rate='power_law', iniZ=0.02, dt=1e6, special_timesteps=60,\
+             sn1a_rate='power_law', life_time_min_ia = None,
+             iniZ=0.02, dt=1e6, special_timesteps=60,\
              nsmerger_bdys=[8, 100], tend=13e9, mgal=1.0e11, transitionmass=8, iolevel=0,\
              ini_alpha=True, is_sygma=False,\
              table='yield_tables/agb_and_massive_stars_nugrid_MESAonly_fryer12delay.txt',\
@@ -542,6 +549,7 @@ class chem_evol(object):
         self.mgal = mgal
         self.transitionmass = transitionmass
         self.iniZ = iniZ
+        self.life_time_min_ia = life_time_min_ia
         self.imf_bdys=imf_bdys
         self.nsmerger_bdys=nsmerger_bdys
         self.popIII_info_fast = popIII_info_fast
@@ -5062,8 +5070,11 @@ class chem_evol(object):
            self.history.sn1a_rate == 'power_law':
 
            # Get the lifetimes of the considered stars (if needed ...)
-           if len(self.poly_fit_dtd_5th) == 0:
-                lifetime_min = self.inter_lifetime_points[0]
+            if (len(self.poly_fit_dtd_5th) == 0):
+                if self.life_time_min_ia is None:
+                    lifetime_min = self.inter_lifetime_points[0]
+                else:
+                    lifetime_min = self.life_time_min_ia
 
         # Normalize the SN Ia rate if not already done
         if len(self.poly_fit_dtd_5th) > 0 and not self.normalized:
